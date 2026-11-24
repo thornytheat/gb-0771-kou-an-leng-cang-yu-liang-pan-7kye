@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | M1 出入库原件采信 | 查看收件、重报和隔离 | `/view/intake` `/api/observe/intake` | `app/modules/intake/service.py` | `tests/test_intake.py` |
 | M2 货批与槽位版本 | 核对容量和门区生效窗 | `/view/registry` `/api/observe/registry` | `app/modules/registry/service.py` `app/modules/registry/versions.py` | `tests/test_registry.py` |
-| M3 查验占位回放 | 逐批回看入出库、调位及冻结 | `/view/custody` `/api/observe/custody` | `app/modules/custody/service.py` `app/modules/custody/transitions.py` | `tests/test_custody.py` |
+| M3 查验占位回放 | 逐批回看入出库、调位及冻结 | `/view/custody` `/api/observe/custody` | `app/modules/custody/service.py` `app/modules/custody/transitions.py` | `tests/test_custody.py` `tests/test_gate.py` |
 | M4 暴露分钟归属 | 按货批核查开门温度及缺证 | `/` `/api/observe/exposure` | `app/modules/exposure/service.py` `app/modules/exposure/doors.py` | `tests/test_exposure.py` |
 | M5 件数和占位对账 | 核对时间与收盘库存守恒 | `/view/capacity` `/api/observe/capacity` | `app/modules/capacity/service.py` | `tests/test_capacity.py` |
 | M6 批次留档复跑 | 归档原件并复算 | `/view/history` `POST /api/receipts` | `app/modules/history/service.py` `app/modules/history/storage.py` | `tests/test_history.py` |
@@ -25,6 +25,10 @@
 | TRAP-14 | K01 两个查验号 | 后写覆盖 | 全组隔离 | `app/modules/intake/service.py` | `tests/test_intake.py::test_conflicting_packet` |
 | TRAP-19 | F03 在 X9 无槽位及门温证据 | 时间重复计到多个缺证类型 | 先按槽位定义，再判门温 | `app/modules/exposure/service.py` | `tests/test_exposure.py::test_priority_keeps_gaps_mutually_exclusive` |
 | TRAP-23 | A2 改门恰逢 08:40 | 归到两个门区 | 左闭右开版本 | `app/modules/registry/versions.py` | `tests/test_registry.py::test_adjacent_versions` |
+| TRAP-24 | 冻结货只报出库、闸口未确认 | 立即腾出槽位少算余量 | 仅申报不释放，保持占位与暴露 | `app/modules/custody/service.py` | `tests/test_gate.py::test_out_declaration_keeps_frozen_goods_occupying` |
+| TRAP-25 | 闸口确认车已开走而查验单未解 | 当正常放行漏记误出闸 | 释放槽位、停暴露、原单待处理并标误出闸 | `app/modules/custody/service.py` | `tests/test_gate.py::test_gate_confirmation_frees_slot_and_stops_exposure` |
+| TRAP-26 | 晚到解冻相对出闸的先后 | 一律保留或一律撤销误出闸 | 生效早于出闸则撤销，晚于则保留 | `app/modules/custody/service.py` | `tests/test_gate.py::test_late_release_before_exit_removes_wrongful_flag` |
+| TRAP-27 | 同一闸口回执重试 | 重复结清或再腾一次槽位 | 回执仅结清一次，其余记重复 | `app/modules/custody/service.py` `app/modules/intake/service.py` | `tests/test_gate.py::test_retried_gate_receipt_settles_once` |
 
 ## 勾稽与范围
 

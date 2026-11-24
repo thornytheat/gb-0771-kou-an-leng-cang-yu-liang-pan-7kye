@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, render_template, request
 from .faults import DockFault
-from .labels import TABS, CODES, KINDS
+from .labels import TABS, CODES, KINDS, EXIT_KINDS
 from .modules.certificate.service import issue
 from .modules.history.routes import receipts
 from .parcels import load_example, receive_pack
@@ -47,4 +47,5 @@ def page(view):
     tracks, ticks = lanes(stages)
     return render_template('station.html', stages=stages, view=view, stamp=stamp, sample=example, tabs=TABS,
                            codes=CODES, kinds=KINDS, tracks=tracks, ticks=ticks, utc=iso, minutes=minutes,
+                           exit_kinds=EXIT_KINDS,
                            entries=receipts().list() if view == 'history' else [])

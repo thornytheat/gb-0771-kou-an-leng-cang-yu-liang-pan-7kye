@@ -1,4 +1,5 @@
 from app.modules.registry.versions import at
+from app.modules.intake.contracts import GATE
 
 
 def change(row, states, registry):
@@ -6,6 +7,11 @@ def change(row, states, registry):
     current = states.get(lot)
     if lot not in registry['lots']:
         return None, 'LOT_UNKNOWN'
+    # GATE rows are settled by ``replay`` so that exits keep their slot and
+    # ticket provenance.  Kept conservative here for callers that only ask
+    # about slot and freeze state.
+    if kind == GATE:
+        return (dict(current), None) if current is not None else (None, 'INVALID_LIFECYCLE')
     if kind == 'IN' and current or kind != 'IN' and current is None:
         return None, 'INVALID_LIFECYCLE'
     if kind in ('IN', 'MOVE'):
